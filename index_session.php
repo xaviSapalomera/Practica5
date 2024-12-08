@@ -9,7 +9,9 @@
 </head>
 <body>
 
-
+<?php
+session_start();
+?>
 
 <div class="header">
 <form method="post">
@@ -41,7 +43,7 @@
         <?php
 
        
-        include './controller/controlador_index.php';
+        include './controller/controlador_index_session.php';
         
         include './controller/controlador_login.php';
 

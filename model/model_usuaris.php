@@ -1,10 +1,12 @@
 <?php
 
+require_once 'env.php';
+
 //Per crear un usuari
 function crearUsuari($dni,$nom,$cognom,$email,$contrasenya){
 
 	try{
-		$connexio = new PDO('mysql:host=localhost;dbname=ptxy_xavi_gallego', 'root', '');
+        $connexio = new PDO('mysql:host=' . SERVER . ';dbname=' . DATABASE, USER_DB, PASS_DB);
 
 		$inserta_Usuaris = $connexio->prepare('INSERT INTO usuaris(dni,nom,cognom,email,contrasenya) VALUES (?,?,?,?,?)');
 
@@ -19,7 +21,7 @@ function crearUsuari($dni,$nom,$cognom,$email,$contrasenya){
 //Mostrar tots els usuaris
 function mostrarUsuaris(){
 	try{
-		$connexio = new PDO('mysql:host=localhost;dbname=ptxy_xavi_gallego', 'root', '');
+		$connexio = new PDO('mysql:host=' . SERVER . ';dbname=' . DATABASE, USER_DB, PASS_DB);
 
 		$stmt = $connexio->prepare('SELECT id,nom,cognom,dni,email,contrasenya FROM usuaris');
 		
@@ -39,7 +41,7 @@ function mostrarUsuaris(){
 //Mostra les dades del usuari introduin de parametre el email
 function perfilDades($email) {
     try {
-		$connexio = new PDO('mysql:host=localhost;dbname=ptxy_xavi_gallego', 'root', '');
+		$connexio = new PDO('mysql:host=' . SERVER . ';dbname=' . DATABASE, USER_DB, PASS_DB);
 
 		$stmt = $connexio->prepare('SELECT id,nickname,nom,cognom,dni,email,contrasenya FROM usuaris WHERE email = ? LIMIT 1');
 		
@@ -62,7 +64,7 @@ function actualitzarPassword($id, $password) {
         
         $password_hash = hash("sha256", $password);
 
-        $connexio = new PDO('mysql:host=localhost;dbname=ptxy_xavi_gallego', 'root', '');
+        $connexio = new PDO('mysql:host=' . SERVER . ';dbname=' . DATABASE, USER_DB, PASS_DB);
         
 		$stmt = $connexio->prepare('UPDATE usuaris SET contrasenya = ? WHERE id = ?');
         
@@ -89,7 +91,7 @@ function actualitzarPassword($id, $password) {
 function actualitzarNickname($id, $nickname) {
     try {
 
-        $connexio = new PDO('mysql:host=localhost;dbname=ptxy_xavi_gallego', 'root', '');
+        $connexio = new PDO('mysql:host=' . SERVER . ';dbname=' . DATABASE, USER_DB, PASS_DB);
         
 		$stmt = $connexio->prepare('UPDATE usuaris SET nickname = ? WHERE id = ?');
         

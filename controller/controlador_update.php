@@ -1,5 +1,7 @@
 <?php
 
+session_start();
+
 include './model/model_articles.php';
 
 

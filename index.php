@@ -4,10 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Consultar Articles</title>
-    <link rel="stylesheet" href="./estil/estil.css">
+    <link rel="stylesheet" href="./estil/estil_sesion.css">
     <link rel="shortcut icon" href="./photos/icon_dtm.webp" />
 </head>
 <body>
+
+<?php
+session_start();
+?>
 <!-- Xavi Gallego -->
 <div class="header">
 <form class="boto" action="login_vista.php">

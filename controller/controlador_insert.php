@@ -1,4 +1,6 @@
 <?php 
+
+session_start();
 include './model/model_articles.php';
 
 //Controla la introduixo del titol i el cos

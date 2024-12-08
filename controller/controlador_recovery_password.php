@@ -1,4 +1,5 @@
 <?php
+
 // Cargar autoload de Composer
 require 'vendor/autoload.php';
 

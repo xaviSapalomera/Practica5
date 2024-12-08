@@ -1,6 +1,7 @@
 <?php
 //Xavi Gallego Palau
 
+require_once 'env.php';
 
 //Actualitza el titol del article
 function actualitzarperTitol($titol)
@@ -44,7 +45,7 @@ function introduirArticles($titol, $cos)
 function mostrarTotsArticles()
 {
     try {
-        $connexio = new PDO("mysql:host=localhost;dbname=ptxy_xavi_gallego","root","");
+        $connexio = new PDO('mysql:host=' . SERVER . ';dbname=' . DATABASE, USER_DB, PASS_DB);
 
         $stmt = $connexio->prepare("SELECT id,titol,cos FROM articles");
 
@@ -62,7 +63,7 @@ function mostrarTotsArticles()
 function borrarArticles($id)
 {
     try {
-        $connexio = new PDO("mysql:host=localhost;dbname=ptxy_xavi_gallego","root","");
+        $connexio = new PDO('mysql:host=' . SERVER . ';dbname=' . DATABASE, USER_DB, PASS_DB);
 
         $stm = $connexio->prepare("DELETE FROM articles WHERE id=?");
 
@@ -74,7 +75,7 @@ function borrarArticles($id)
 //mostra els articles ordernats per id de forma descendent
 function mostrarArticlesOrdenatsIDdesc(){
     try {
-		$connexio = new PDO('mysql:host=localhost;dbname=ptxy_xavi_gallego', 'root', '');
+		$connexio = new PDO('mysql:host=' . SERVER . ';dbname=' . DATABASE, USER_DB, PASS_DB);
 
 		$stmt = $connexio->prepare('SELECT id,titol,cos FROM articles ORDER BY id DESC');
 		
@@ -93,7 +94,7 @@ function mostrarArticlesOrdenatsIDdesc(){
 //mostra els articles ordernats per id de forma ascendent
 function mostrarArticlesOrdenatsIDasc(){
     try {
-		$connexio = new PDO('mysql:host=localhost;dbname=ptxy_xavi_gallego', 'root', '');
+		$connexio = new PDO('mysql:host=' . SERVER . ';dbname=' . DATABASE, USER_DB, PASS_DB);
 
 		$stmt = $connexio->prepare('SELECT id,titol,cos FROM articles ORDER BY id ASC');
 		
@@ -113,7 +114,7 @@ function mostrarArticlesOrdenatsIDasc(){
 //mostra els articles ordernats per titol de forma ascendent
 function mostrarArticlesOrdenatsTitolAsc(){
     try {
-		$connexio = new PDO('mysql:host=localhost;dbname=ptxy_xavi_gallego', 'root', '');
+		$connexio = new PDO('mysql:host=' . SERVER . ';dbname=' . DATABASE, USER_DB, PASS_DB);
 
 		$stmt = $connexio->prepare('SELECT id,titol,cos FROM articles ORDER BY titol ASC');
 		
@@ -134,7 +135,7 @@ function mostrarArticlesOrdenatsTitolAsc(){
 function mostrarArticlesOrdenatsTitolDesc(){
     
     try {
-		$connexio = new PDO('mysql:host=localhost;dbname=ptxy_xavi_gallego', 'root', '');
+		$connexio = new PDO('mysql:host=' . SERVER . ';dbname=' . DATABASE, USER_DB, PASS_DB);
 
 		$stmt = $connexio->prepare('SELECT id,titol,cos FROM articles ORDER BY titol DESC');
 		

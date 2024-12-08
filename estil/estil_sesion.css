@@ -147,3 +147,66 @@ h1 {
     color: #ccc;
     pointer-events: none;
 }
+.articles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.articles-blocks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 20px;
+    justify-content: center;
+}
+
+/* Bloque individual */
+.article-block {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    width: 300px; /* Tamaño fijo para los bloques */
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Encabezado del bloque */
+.article-header h2 {
+    font-size: 1em;
+    color: #777;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+.article-header h3 {
+    font-size: 1.5em;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+/* Contenido del bloque */
+.article-content p {
+    font-size: 1em;
+    color: #555;
+    line-height: 1.6;
+}
+
+/* Hover en los bloques */
+.article-block:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive: Ajuste para pantallas pequeñas */
+@media (max-width: 768px) {
+    .article-block {
+        width: 100%; /* Ocupa todo el ancho en pantallas pequeñas */
+    }
+}

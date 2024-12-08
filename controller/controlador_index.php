@@ -1,4 +1,9 @@
 <?php
+
+session_start();
+
+
+
 include './model/model_articles.php';
 
 $order = isset($_POST['order']) ? $_POST['order'] : 'normal';
@@ -23,6 +28,7 @@ switch ($order) {
 if(isset($_POST['Logout'])){
     session_destroy();
     header('location: index.php');
+    exit();
 }
 
 $paginaActual = isset($_GET['page']) ? (int)$_GET['page'] : 1;
@@ -50,23 +56,26 @@ $articles = array_slice($articles, $offset, $articulosPorPagina);
     <button type="submit">Ordenar</button>
 </form>
 
-    <section class="articles">
-        <?php if (!empty($articles)) { ?>
-            <ul>
-                <?php foreach ($articles as $article) { ?>
-                    <li>
-                        <?= isset($article['id']) ? $article['id'] : 'Sense ID' ?>
-                        <?= isset($article['titol']) ? htmlspecialchars($article['titol']) : 'Sense Titol' ?>
-                    </li>
-                    <li>
-                        <?= isset($article['cos']) ? htmlspecialchars($article['cos']) : 'Sense Cos' ?>
-                    </li>
-                <?php } ?>
-            </ul>
-        <?php } else { ?>
-            <p>No hi ha articles disponibles en aquesta pàgina.</p>
-        <?php } ?>
-    </section>
+<section class="articles">
+    <?php if (!empty($articles)) { ?>
+        <div class="articles-blocks">
+            <?php foreach ($articles as $article) { ?>
+                <div class="article-block">
+                    <div class="article-header">
+                        <h2><?= isset($article['id']) ? $article['id'] : 'Sense ID' ?></h2>
+                        <h3><?= isset($article['titol']) ? htmlspecialchars($article['titol']) : 'Sense Titol' ?></h3>
+                    </div>
+                    <div class="article-content">
+                        <p><?= isset($article['cos']) ? htmlspecialchars($article['cos']) : 'Sense Cos' ?></p>
+                    </div>
+                </div>
+            <?php } ?>
+        </div>
+    <?php } else { ?>
+        <p>No hi ha articles disponibles en aquesta pàgina.</p>
+    <?php } ?>
+</section>
+
 
     <!-- Secció per a la paginació -->
     <section class="paginacio">
