@@ -26,6 +26,10 @@ session_start();
     <input class="boto_header" type="submit" value="INSERTAR">
 </form>
 
+<form  action="admin_panel.php" method="post">
+    <input class="boto_header" type="submit" value="ADMIN">
+</form>
+
 <form action="index_session.php" method="post">
     <input class="boto_header" type="submit" value="HOME">
 </form>
