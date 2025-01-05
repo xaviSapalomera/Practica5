@@ -23,7 +23,7 @@ function mostrarUsuaris(){
 	try{
 		$connexio = new PDO('mysql:host=' . SERVER . ';dbname=' . DATABASE, USER_DB, PASS_DB);
 
-		$stmt = $connexio->prepare('SELECT id,nom,cognom,dni,email,contrasenya FROM usuaris');
+		$stmt = $connexio->prepare('SELECT id,nom,nickname,cognom,dni,email,contrasenya,admin FROM usuaris');
 		
 		$stmt->execute();
 

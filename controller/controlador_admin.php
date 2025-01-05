@@ -3,7 +3,7 @@ include './model/model_usuaris.php';
 
 $usuaris = mostrarUsuaris();
 
-echo '<table border="1px">';
+echo '<table border="1px white">';
 
 echo '<tr>';
 echo '<th>DNI</th>';
