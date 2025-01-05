@@ -4,17 +4,17 @@
 require_once 'env.php';
 
 //Actualitza el titol del article
-function actualitzarperTitol($titol)
+function actualitzarArticle($titol,$cos,$id)
 {
     try {
         
-        $connexio = new PDO("mysql:host=localhost;dbname=ptxy_xavi_gallego", "root", "");
+        $connexio = new PDO('mysql:host=' . SERVER . ';dbname=' . DATABASE, USER_DB, PASS_DB);
 
         
-        $stm = $connexio->prepare("UPDATE articles SET titol = ? WHERE titol = ?");
+        $stm = $connexio->prepare("UPDATE articles SET titol = ?, cos = ? WHERE id = ?");
     
         
-        $stm->execute([$titol, $titol]);
+        $stm->execute([$titol,$cos, $id]);
     
     } catch (PDOException $e) {
         
@@ -22,18 +22,33 @@ function actualitzarperTitol($titol)
     
     }
 }
+function trobarArticlePerID($id) {
+    try {
 
+        $connexio = new PDO('mysql:host=' . SERVER . ';dbname=' . DATABASE, USER_DB, PASS_DB);
+
+        $stmt = $connexio->prepare('SELECT titol, cos FROM articles WHERE id = ? LIMIT 1');
+
+        $stmt->execute([$id]);
+
+        $resultat = $stmt->fetch();
+
+        return $resultat ? $resultat : null;
+
+    } catch (PDOException $e) {
+        // Log the error for debugging purposes
+        error_log("Error " . $e->getMessage());
+    }
+}
 //Aquesta funcio serveix per crear Articles.
-function introduirArticles($titol, $cos)
+function introduirArticles($titol, $cos,$data,$user_id)
 {
     try {
-        $connexio = new PDO("mysql:host=localhost;dbname=ptxy_xavi_gallego","root","");
+        $connexio = new PDO('mysql:host=' . SERVER . ';dbname=' . DATABASE, USER_DB, PASS_DB);
 
-        $insert_Articles = $connexio->prepare(
-            "INSERT INTO articles(titol,cos) VALUES (?,?)"
-        );
+        $insert_Articles = $connexio->prepare("INSERT INTO articles(titol,cos,data,user_id) VALUES (?,?,?,?)");
 
-        $insert_Articles->execute([$titol, $cos]);
+        $insert_Articles->execute([$titol, $cos,$data,$user_id]);
 
         return true;
     } catch (PDOException $e) {
@@ -47,7 +62,7 @@ function mostrarTotsArticles()
     try {
         $connexio = new PDO('mysql:host=' . SERVER . ';dbname=' . DATABASE, USER_DB, PASS_DB);
 
-        $stmt = $connexio->prepare("SELECT id,titol,cos FROM articles");
+        $stmt = $connexio->prepare("SELECT id,titol,cos,data,user_id FROM articles");
 
         $stmt->execute();
 
@@ -77,7 +92,7 @@ function mostrarArticlesOrdenatsIDdesc(){
     try {
 		$connexio = new PDO('mysql:host=' . SERVER . ';dbname=' . DATABASE, USER_DB, PASS_DB);
 
-		$stmt = $connexio->prepare('SELECT id,titol,cos FROM articles ORDER BY id DESC');
+		$stmt = $connexio->prepare('SELECT id,titol,cos,data,user_id FROM articles ORDER BY id DESC');
 		
 		$stmt->execute();
 
@@ -96,7 +111,7 @@ function mostrarArticlesOrdenatsIDasc(){
     try {
 		$connexio = new PDO('mysql:host=' . SERVER . ';dbname=' . DATABASE, USER_DB, PASS_DB);
 
-		$stmt = $connexio->prepare('SELECT id,titol,cos FROM articles ORDER BY id ASC');
+		$stmt = $connexio->prepare('SELECT id,titol,cos,data,user_id FROM articles ORDER BY id ASC');
 		
 		$stmt->execute();
 
@@ -116,7 +131,7 @@ function mostrarArticlesOrdenatsTitolAsc(){
     try {
 		$connexio = new PDO('mysql:host=' . SERVER . ';dbname=' . DATABASE, USER_DB, PASS_DB);
 
-		$stmt = $connexio->prepare('SELECT id,titol,cos FROM articles ORDER BY titol ASC');
+		$stmt = $connexio->prepare('SELECT id,titol,cos,data,user_id FROM articles ORDER BY titol ASC');
 		
 		$stmt->execute();
 
@@ -137,7 +152,7 @@ function mostrarArticlesOrdenatsTitolDesc(){
     try {
 		$connexio = new PDO('mysql:host=' . SERVER . ';dbname=' . DATABASE, USER_DB, PASS_DB);
 
-		$stmt = $connexio->prepare('SELECT id,titol,cos FROM articles ORDER BY titol DESC');
+		$stmt = $connexio->prepare('SELECT id,titol,cos,data,user_id FROM articles ORDER BY titol DESC');
 		
 		$stmt->execute();
 

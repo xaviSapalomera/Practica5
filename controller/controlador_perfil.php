@@ -4,13 +4,11 @@ include "./model/model_usuaris.php";
 $correu = "";
 session_start();
 
-if (isset($_COOKIE["remember_me"])) {
-    $correu = $_COOKIE["remember_me"]; // Assign the cookie value to $correu
-
+if ($_SESSION['correu']) {
+      $correu = $_SESSION['correu'];
 
 
     $resultats = perfilDades($correu);
-
 
     if ($resultats) {
         foreach ($resultats as $resultat) {
@@ -35,15 +33,15 @@ if (isset($_COOKIE["remember_me"])) {
 
         }
     }
-    if(isset($_POST['nomUsuari'])){
 
-        $nickname = $_POST['nomUsuari'];
+//actualitzar el nom del usuari
+if(isset($_POST['nomUsuari'])){
+
+    $nickname = $_POST['nomUsuari'];
             
-            actualitzarNickname($id,$nickname);
+    actualitzarNickname($id,$nickname);    
 
-        
-
-    }
+}
 
     if (isset($_POST["oldpassword"]) && isset($_POST["newpassword"]) && isset($_POST["re-newpassword"])) {
         

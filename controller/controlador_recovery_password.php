@@ -1,42 +1,46 @@
 <?php
+// Mostrar errores PHP (Desactivar en producción)
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
-// Cargar autoload de Composer
-require 'vendor/autoload.php';
-
+// Incluir la librería PHPMailer
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+use PHPMailer\PHPMailer\SMTP;
 
-// Iniciar PHPMailer
+
+
+// Inicio
 $mail = new PHPMailer(true);
 
-if (isset($_POST['correu'])) {
-    $correu = $_POST['correu']; // Obtener el correo del formulario
+try {
+    // Configuracion SMTP
+    $mail->SMTPDebug = SMTP::DEBUG_SERVER;  // Muestra detalles del proceso SMTP (Desactivar en producción)
+    $mail->isSMTP();                        // Activar envío SMTP
+    $mail->Host = 'smtp.gmail.com';          // Servidor SMTP de Gmail (puedes cambiarlo por otro)
+    $mail->SMTPAuth = true;                  // Activar autenticación SMTP
+    $mail->Username = 'tu_correo@gmail.com'; // Usuario SMTP (tu correo de Gmail)
+    $mail->Password = 'tu_contraseña_de_aplicacion'; // Contraseña de aplicación de Gmail (nunca la contraseña normal)
+    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // Activar encriptación STARTTLS
+    $mail->Port = 587;                       // Puerto SMTP
 
-    try {
-        // Configuración del servidor SMTP
-        $mail->isSMTP();                                // Usar SMTP
-        $mail->Host = 'smtp.gmail.com';                // Servidor SMTP de Gmail
-        $mail->SMTPAuth = true;                        // Activar autenticación SMTP
-        $mail->Username = 'x.gallego@sapalomera.cat';  // Correo remitente
-        $mail->Password = 'fpcp ybyi xtve hdtm';      // Contraseña segura (de aplicación)
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // Encriptación STARTTLS
-        $mail->Port = 587;                             // Puerto SMTP
+    // Configurar el remitente
+    $mail->setFrom('tu_correo@gmail.com', 'Tu Nombre'); // Correo y nombre del remitente
 
-        // Configuración del correo
-        $mail->setFrom('x.gallego@sapalomera.cat', 'Tu Nombre');
-        $mail->addAddress($correu, 'Nombre del Destinatario'); // Receptor
+    // Destinatarios
+    $mail->addAddress('destinatario@dominio.com', 'Nombre del destinatario'); // Dirección y nombre del destinatario
 
-        // Contenido del correo
-        $mail->isHTML(true);                           // Formato HTML
-        $mail->Subject = 'Prueba de correo PHPMailer';
-        $mail->Body    = 'Este es un correo de prueba enviado desde PHPMailer. ¡Funciona!';
+    // Contenido del correo
+    $mail->isHTML(true);               // Activar HTML
+    $mail->Subject = 'Asunto del correo'; // Asunto del correo
+    $mail->Body    = 'Este es un <b>correo de prueba</b> enviado desde PHPMailer'; // Cuerpo en HTML
+    $mail->AltBody = 'Este es un correo de prueba enviado desde PHPMailer'; // Cuerpo en texto plano (para clientes de correo sin soporte HTML)
 
-        // Enviar el correo
-        $mail->send();
-        echo 'El correo ha sido enviado exitosamente.';
-    } catch (Exception $e) {
-        echo "Error al enviar el correo. Error: {$mail->ErrorInfo}";
-    }
-} else {
-    echo 'No se ha proporcionado un correo.';
+    // Enviar el correo
+    $mail->send();
+    echo 'El mensaje se ha enviado correctamente.';
+} catch (Exception $e) {
+    // Capturar errores y mostrar mensaje
+    echo "El mensaje no se ha enviado. Mailer Error: {$mail->ErrorInfo}";
 }

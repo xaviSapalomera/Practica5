@@ -14,7 +14,7 @@ echo '<th>EMAIL</th>';
 echo '<th>ADMIN</th>';
 echo '</tr>';
 
-
+//Motrar els usuaris de la base de dades
 foreach ($usuaris as $usuari) {
     echo '<tr>';
     echo '<td>' . htmlspecialchars($usuari['dni']) . '</td>';

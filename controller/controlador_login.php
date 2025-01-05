@@ -8,9 +8,19 @@ if (!isset($_SESSION['intents_fallits'])) {
     $_SESSION['intents_fallits'] = 0;
 }
 
+
+
+// Clau secreta del reCAPTCHA
+$secretKey = '6LeW4o0qAAAAABVx7d3kjOQd2weZFknuT1_iTh1E'; // Substitueix per la teva clau secreta
+
+if ($_SESSION['mantindre_sessio'] === true) {
+    header('Location: index_session.php');
+    exit();
+}
+
 //borra la sessio directament
 if (isset($_POST['Logout'])) {
-    session_destroy(); // Destruir la sesión
+    session_destroy(); 
 
     header('Location: index.php');
 
@@ -20,14 +30,6 @@ if (isset($_POST['Logout'])) {
                   $params["path"], $params["domain"], 
                   $params["secure"], $params["httponly"]);
     }
-    exit();
-}
-
-// Clau secreta del reCAPTCHA
-$secretKey = '6LeW4o0qAAAAABVx7d3kjOQd2weZFknuT1_iTh1E'; // Substitueix per la teva clau secreta
-
-if ($_SESSION['mantindre_sessio'] === true) {
-    header('Location: index_session.php');
     exit();
 }
 

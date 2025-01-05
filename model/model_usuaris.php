@@ -57,6 +57,34 @@ function perfilDades($email) {
 	
 	}
 }
+//Filtra el usuari per la seva id
+function filtrarUsuarisPerID($id) {
+    try {
+        // Establish database connection using PDO
+        $connexio = new PDO('mysql:host=' . SERVER . ';dbname=' . DATABASE, USER_DB, PASS_DB);
+        
+        // Prepare SQL statement with a parameter placeholder
+        $stmt = $connexio->prepare('SELECT id, nickname, nom, cognom, dni, email, contrasenya FROM usuaris WHERE id = ? LIMIT 1');
+        
+        // Execute the prepared statement with the actual ID parameter
+        $stmt->execute([$id]);
+        
+        // Fetch the result (as an associative array)
+        $resultat = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Return the result if found, otherwise null
+        return $resultat ? $resultat : null;
+
+    } catch(PDOException $e) {
+        // Log error for debugging
+        error_log("Database error: " . $e->getMessage());
+
+        // Return null or false in case of an error
+        return null;
+    }
+}
+
+
 
 //actualitza la password de la sesio on esta iniciada
 function actualitzarPassword($id, $password) {

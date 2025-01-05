@@ -26,14 +26,6 @@ session_start();
     <input class="boto_header" type="submit" value="INSERTAR">
 </form>
 
-<form action="update.php" method="post">
-    <input class="boto_header" type="submit" value="ACTUALIZAR">
-</form>
-
-<form action="delete.php" method="post">
-    <input class="boto_header" type="submit" value="ELIMINAR">
-</form>
-
 <form action="index_session.php" method="post">
     <input class="boto_header" type="submit" value="HOME">
 </form>
