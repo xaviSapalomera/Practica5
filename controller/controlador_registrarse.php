@@ -2,6 +2,8 @@
 $emailValidad = null;
     include './model/model_usuaris.php';
 
+    $usuariModel = new Usuari();
+
 //Comprova que se han introduit tot les credencials per registrarse
 if(isset($_POST['nom']) && isset($_POST["cognom"]) && isset($_POST['dni']) && isset($_POST["email"]) && isset($_POST['contrasenya'])){
 
@@ -22,7 +24,7 @@ if(isset($_POST['nom']) && isset($_POST["cognom"]) && isset($_POST['dni']) && is
         //si el email es validad el redireix
         if($emailValidad){
     
-            crearUsuari($dni,$nom,$cognom,$email_POST,$contrasenya_hash);
+           $usuariModel->crearUsuari($dni,$nom,$cognom,$email_POST,$contrasenya_hash);
 
             header('Location: index.php');
 
@@ -45,9 +47,9 @@ if(isset($_POST['nom']) && isset($_POST["cognom"]) && isset($_POST['dni']) && is
 
 //Comprova que el email introduit no esta registrat    
 function comprobarEmail($email_POST){
+    $usuariModel = new Usuari();
 
-
-$usuaris = mostrarUsuaris();
+$usuaris = $usuariModel->mostrarUsuaris();
 
         foreach($usuaris as $usuari){
         

@@ -8,30 +8,12 @@ if (!isset($_SESSION['intents_fallits'])) {
     $_SESSION['intents_fallits'] = 0;
 }
 
-
-
-// Clau secreta del reCAPTCHA
-$secretKey = '6LeW4o0qAAAAABVx7d3kjOQd2weZFknuT1_iTh1E'; // Substitueix per la teva clau secreta
-
 if ($_SESSION['mantindre_sessio'] === true) {
     header('Location: index_session.php');
     exit();
 }
 
-//borra la sessio directament
-if (isset($_POST['Logout'])) {
-    session_destroy(); 
 
-    header('Location: index.php');
-
-    if (ini_get("session.use_cookies")) {
-        $params = session_get_cookie_params();
-        setcookie(session_name(), '', time() - 42000, 
-                  $params["path"], $params["domain"], 
-                  $params["secure"], $params["httponly"]);
-    }
-    exit();
-}
 
 // Quan es fa el login
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['LOGIN'])) {
@@ -83,28 +65,44 @@ function validateRecaptcha($secretKey, $recaptchaResponse) {
     return $responseKeys['success'] ?? false;
 }
 
+
 // Funció per verificar login
 function verificarLogin($correu, $password) {
-    $usuaris = mostrarUsuaris();
+
+    $UsuariModel = new Usuari();
+
+    $usuaris = $UsuariModel->mostrarUsuaris();
 
     foreach ($usuaris as $usuari) {
         if ($usuari['email'] === $correu && $usuari['contrasenya'] === $password) {
             return true;
+            $_SESSION['idUsuari'] = $usuari['id']; 
         }
     }
     return false;
 }
 
+
 // Funció per gestionar l'usuari verificat
 function functionVerificarConta($loginVerificat, $correu, $rememberME) {
+    $usuariModel = new Usuari();
     if ($loginVerificat) {
         if ($rememberME) {
             $_SESSION['mantindre_sessio'] = true;
         }
 
+        
+        
         $_SESSION['correu'] = $correu;
         $_SESSION['inici_sessio'] = time();
         $_SESSION['verificat'] = true;
+
+        $resultat = $usuariModel->perfilDades($correu);
+
+// Verificar si se obtuvo un resultado válido
+if ($resultat && is_array($resultat)) {
+    $_SESSION['nickname'] = $resultat['nickname'];
+}
 
         if ($rememberME) {
             setcookie("remember_me", $correu, time() + (86400 * 30), "/", "", true, true); // 30 dies

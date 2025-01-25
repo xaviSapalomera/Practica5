@@ -2,13 +2,14 @@
 
 include './model/model_articles.php';
 
+$articleModel = new Article();
 
     if(isset($_POST['id'])){
 
         $id = $_POST['id'];
 
 
-     borrarArticles($id);
+     $articleModel->borrarArticles($id);
 
         
 

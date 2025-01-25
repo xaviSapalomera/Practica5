@@ -1,81 +1,89 @@
 <?php
+error_reporting(E_ALL); // Informar de todos los errores
+ini_set('display_errors', 1); // Mostrar los errores en pantalla
+
 include "./model/model_usuaris.php";
 
-$correu = "";
+echo '<script src="./ts/js/articles_control.js"></script>';
+echo '<link rel="stylesheet" href="./estil/pop_up.css">';
+
+$usuariModel = new Usuari();
+
 session_start();
 
-if ($_SESSION['correu']) {
-      $correu = $_SESSION['correu'];
-
-
-    $resultats = perfilDades($correu);
-
-    if ($resultats) {
-        foreach ($resultats as $resultat) {
-            echo "<br>";
-            echo "<div style='color:white;font-size:30px;'>";
-
-            $id = $resultat['id'];
-
-            echo "ID: " . $resultat["id"] . "<br><br>";
-
-            echo "DNI: " . $resultat["dni"] . "<br><br>";
-
-            echo "NICKNAME: " . $resultat["nickname"] . "<br><br>";
-
-            echo "NOM: " . $resultat["nom"] . "<br><br>";
-
-            echo "COGNOM: " . $resultat["cognom"] . "<br><br>";
-
-            echo "CORREU: " . $resultat["email"] . "<br><br>";
-            echo "</div>";
-
-
-        }
-    }
-
-//actualitzar el nom del usuari
-if(isset($_POST['nomUsuari'])){
-
-    $nickname = $_POST['nomUsuari'];
-            
-    actualitzarNickname($id,$nickname);    
-
+// Verificar si el usuario ha iniciado sesión
+if (!isset($_SESSION['correu'])) {
+    echo "<h1>No has iniciat sessió</h1>";
+    exit();
 }
 
-    if (isset($_POST["oldpassword"]) && isset($_POST["newpassword"]) && isset($_POST["re-newpassword"])) {
-        
-        $antiga_password = $_POST["oldpassword"];
+$correu = $_SESSION['correu'];
 
-        $nova_password = $_POST["newpassword"];
+// Obtener datos del perfil
+$resultat = $usuariModel->perfilDades($correu);
 
-        $re_nova_password = $_POST["re-newpassword"];
+if ($resultat) {
+    echo "<div style='color:white;font-size:30px;'>";
+    echo "NICKNAME: " . htmlspecialchars($resultat["nickname"] ?? 'Sense Nickname', ENT_QUOTES, 'UTF-8') . "<br><br>";
+    echo "CORREU: " . htmlspecialchars($resultat["email"] ?? 'Sense Email', ENT_QUOTES, 'UTF-8') . "<br><br>";
+    echo "NOM: " . htmlspecialchars($resultat["nom"] ?? 'Sense Nom', ENT_QUOTES, 'UTF-8') . "<br><br>";
+    echo "COGNOM: " . htmlspecialchars($resultat["cognom"] ?? 'Sense Cognom', ENT_QUOTES, 'UTF-8') . "<br><br>";
+    echo "</div>";
+} else {
+    echo "<h1>Usuari no trobat</h1>";
+    exit();
+}
 
-        $contrasenya_antiga_hash = hash("sha256", $antiga_password);
+// Formulario para cambiar nickname
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['nomUsuari'])) {
+    $nickname = htmlspecialchars($_POST['nomUsuari'], ENT_QUOTES, 'UTF-8');
+    if ($nickname != $resultat['nickname'] && $usuariModel->actualitzarNickname($resultat['id'], $nickname)) {
+        echo "<h1 class='alert-popup success show-alert'>Nickname actualitzat correctament</h1>";
+    } else {
+        echo "<h1 class='alert-popup error show-alert'>No se pudo actualizar el nickname</h1>";
+    }
+}
 
+// Formulario para cambiar contraseña
+if (!empty($_POST["oldpassword"]) && !empty($_POST["newpassword"]) && !empty($_POST["re-newpassword"])) {
+    $antiga_password = $_POST["oldpassword"];
+    $nova_password = $_POST["newpassword"];
+    $re_nova_password = $_POST["re-newpassword"];
 
-        if ($resultats) {
-            foreach ($resultats as $resultat) {
-                if ($contrasenya_antiga_hash == $resultat["contrasenya"]) {
-
-                    actualitzarPassword($id,$nova_password);
-
-                    echo '<h1>'.$id.'</h1>';
-
-                    echo "<h1>OK</h1>";
-                } else {
-                    echo "<h1>La contrasenya no es correcta</h1>";
-                }
+    // Verificar que las contraseñas coincidan
+    if ($nova_password === $re_nova_password) {
+        // Verificar la contraseña antigua
+        if (password_verify($antiga_password, $resultat["contrasenya"])) {
+            // Actualizar la nueva contraseña
+            $nova_password_hash = password_hash($nova_password, PASSWORD_DEFAULT);
+            if ($usuariModel->actualitzarPassword($resultat['id'], $nova_password_hash)) {
+                echo "<h1>Contrasenya actualitzada correctament</h1>";
+            } else {
+                echo "<h1>Error al actualitzar la contrasenya</h1>";
             }
+        } else {
+            echo "<h1>La contrasenya antiga no és correcta</h1>";
         }
     } else {
-        $antiga_password = "";
-        $nova_password = "";
-        $re_nova_password = "";
+        echo "<h1>Les contrasenyes no coincideixen</h1>";
     }
-} else {
-    header("Location: login_vista.php");
 }
-exit();
 
+// Formulario HTML para actualizar el nombre de usuario
+?>
+<form method="post">
+    <input type="text" name="nomUsuari" value="<?= htmlspecialchars($resultat['nickname'] ?? '') ?>" placeholder="Nuevo Nickname">
+    <input type="submit" value="Cambiar Nickname">
+</form>
+
+<!-- Formulario HTML para actualizar la contraseña -->
+<form method="post">
+    <input type="password" name="oldpassword" placeholder="Antigua Contraseña">
+    <input type="password" name="newpassword" placeholder="Nueva Contraseña">
+    <input type="password" name="re-newpassword" placeholder="Repita Nueva Contraseña">
+    <input type="submit" value="Cambiar Contraseña">
+</form>
+
+<?php
+exit();
 ?>

@@ -1,0 +1,5 @@
+<?php
+return [
+    'GITHUB_CLIENT_ID' => 'Ov23liqBcX3qff2ZoFt0',
+    'GITHUB_CLIENT_SECRET' => '2ac35ed6b7998173631090f17b105498e420d52b'
+];

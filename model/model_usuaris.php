@@ -1,140 +1,117 @@
 <?php
+require_once './env.php';
 
-require_once 'env.php';
+class Usuari {
+    private $connexio;
 
-//Per crear un usuari
-function crearUsuari($dni,$nom,$cognom,$email,$contrasenya){
+    public function __construct() {
+        try {
+            $this->connexio = new PDO(
+                'mysql:host=' . SERVER . ';dbname=' . DATABASE,
+                USER_DB,
+                PASS_DB,
+                [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                ]
+            );
+        } catch (PDOException $e) {
+            die("Error al conectar a la base de datos: " . $e->getMessage());
+        }
+    }
 
-	try{
-        $connexio = new PDO('mysql:host=' . SERVER . ';dbname=' . DATABASE, USER_DB, PASS_DB);
+    public function crearUsuari($dni, $nom, $cognom, $email, $contrasenya) {
+        try {
+            $stmt = $this->connexio->prepare(
+                'INSERT INTO usuaris (dni, nom, cognom, email, contrasenya) VALUES (?, ?, ?, ?, ?)'
+            );
+            $stmt->execute([$dni, $nom, $cognom, $email, password_hash($contrasenya, PASSWORD_BCRYPT)]);
+            return $this->connexio->lastInsertId();
+        } catch (PDOException $e) {
+            error_log("Error al crear usuario: " . $e->getMessage());
+            return false;
+        }
+    }
 
-		$inserta_Usuaris = $connexio->prepare('INSERT INTO usuaris(dni,nom,cognom,email,contrasenya) VALUES (?,?,?,?,?)');
+    public function mostrarUsuaris() {
+        try {   
+            $stmt = $this->connexio->query('SELECT id, nom, nickname, cognom, dni, email, contrasenya, admin FROM usuaris');
+            return $stmt->fetchAll();
+        } catch (PDOException $e) {
+            error_log("Error al mostrar usuarios: " . $e->getMessage());
+            return [];
+        }
+    }
 
-		$inserta_Usuaris->execute([$dni,$nom,$cognom,$email,$contrasenya]);
+    public function perfilDades($email) {
+        try {
+            $stmt = $this->connexio->prepare('SELECT id, nickname, nom, cognom, dni, email, contrasenya FROM usuaris WHERE email = ? LIMIT 1');
+            $stmt->execute([$email]);
+            return $stmt->fetch(); // Retorna solo un registro
+        } catch (PDOException $e) {
+            error_log("Error al obtenir perfil per a l'email $email: " . $e->getMessage());
+            return null;
+        }
+    }
 
-	}catch(PDOException $e){
-		echo "Error: ". $e->getMessage();
-	}
+    public function actualitzarPassword($id, $password) {
+        try {
+            $password_hash = password_hash($password, PASSWORD_BCRYPT);
+            $stmt = $this->connexio->prepare('UPDATE usuaris SET contrasenya = ? WHERE id = ?');
+            $stmt->execute([$password_hash, $id]);
+            return $stmt->rowCount() > 0;
+        } catch (PDOException $e) {
+            error_log("Error al actualitzar contrasenya: " . $e->getMessage());
+            return false;
+        }
+    }
 
-}
+    public function actualitzarNickname($id, $nickname) {
+        try {
+            $stmt = $this->connexio->prepare('UPDATE usuaris SET nickname = ? WHERE id = ?');
+            $stmt->execute([$nickname, $id]);
+            return $stmt->rowCount() > 0;
+        } catch (PDOException $e) {
+            error_log("Error al actualitzar nickname: " . $e->getMessage());
+            return false;
+        }
+    }
+    public function actualitzarEmail($id, $correu) {
+        try {
+            $stmt = $this->connexio->prepare('UPDATE usuaris SET correu = ? WHERE id = ?');
+            $stmt->execute([$correu, $id]);
+            return $stmt->rowCount() > 0;
+        } catch (PDOException $e) {
+            error_log("Error al actualitzar nickname: " . $e->getMessage());
+            return false;
+        }
+    }
 
-//Mostrar tots els usuaris
-function mostrarUsuaris(){
-	try{
-		$connexio = new PDO('mysql:host=' . SERVER . ';dbname=' . DATABASE, USER_DB, PASS_DB);
-
-		$stmt = $connexio->prepare('SELECT id,nom,nickname,cognom,dni,email,contrasenya,admin FROM usuaris');
-		
-		$stmt->execute();
-
-		$resultats = $stmt->fetchAll();
-
-		return $resultats;
-
-	}catch(PDOException $e){
-
-		echo "Error: ". $e->getMessage();
-	
-	}
-}
-
-//Mostra les dades del usuari introduin de parametre el email
-function perfilDades($email) {
-    try {
-		$connexio = new PDO('mysql:host=' . SERVER . ';dbname=' . DATABASE, USER_DB, PASS_DB);
-
-		$stmt = $connexio->prepare('SELECT id,nickname,nom,cognom,dni,email,contrasenya FROM usuaris WHERE email = ? LIMIT 1');
-		
-		$stmt->execute([$email]);
-
-		$resultats = $stmt->fetchAll();
-
-		return $resultats;
-
-	}catch(PDOException $e){
-
-		echo "Error: ". $e->getMessage();
-	
-	}
-}
-//Filtra el usuari per la seva id
-function filtrarUsuarisPerID($id) {
-    try {
-        // Establish database connection using PDO
-        $connexio = new PDO('mysql:host=' . SERVER . ';dbname=' . DATABASE, USER_DB, PASS_DB);
-        
-        // Prepare SQL statement with a parameter placeholder
-        $stmt = $connexio->prepare('SELECT id, nickname, nom, cognom, dni, email, contrasenya FROM usuaris WHERE id = ? LIMIT 1');
-        
-        // Execute the prepared statement with the actual ID parameter
-        $stmt->execute([$id]);
-        
-        // Fetch the result (as an associative array)
-        $resultat = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        // Return the result if found, otherwise null
-        return $resultat ? $resultat : null;
-
-    } catch(PDOException $e) {
-        // Log error for debugging
-        error_log("Database error: " . $e->getMessage());
-
-        // Return null or false in case of an error
-        return null;
+    public function filtrarUsuarisPerID($id) {
+        try {
+            // Establish database connection using PDO
+            $connexio = new PDO('mysql:host=' . SERVER . ';dbname=' . DATABASE, USER_DB, PASS_DB);
+            
+            // Prepare SQL statement with a parameter placeholder
+            $stmt = $connexio->prepare('SELECT id, nickname, nom, cognom, dni, email, contrasenya FROM usuaris WHERE id = ? LIMIT 1');
+            
+            // Execute the prepared statement with the actual ID parameter
+            $stmt->execute([$id]);
+            
+            // Fetch the result (as an associative array)
+            $resultat = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+            // Return the result if found, otherwise null
+            return $resultat ? $resultat : null;
+    
+        } catch(PDOException $e) {
+            // Log error for debugging
+            error_log("Database error: " . $e->getMessage());
+    
+            // Return null or false in case of an error
+            return null;
+        }
     }
 }
 
-
-
-//actualitza la password de la sesio on esta iniciada
-function actualitzarPassword($id, $password) {
-    try {
-        
-        $password_hash = hash("sha256", $password);
-
-        $connexio = new PDO('mysql:host=' . SERVER . ';dbname=' . DATABASE, USER_DB, PASS_DB);
-        
-		$stmt = $connexio->prepare('UPDATE usuaris SET contrasenya = ? WHERE id = ?');
-        
-		$stmt->execute([$password_hash, $id]);
-
-        if ($stmt->rowCount() > 0) {
-        
-			echo "<h1 style='color:white'> Contraseña actualizada correctamente.</h1>";
-        
-		} else {
-        
-			echo "<h1 style='color:white'> No se ha encontrado el usuario o la contraseña no ha cambiado.</h1>";
-        
-		}
-
-    } catch (PDOException $e) {
-        
-		echo "Error: ". $e->getMessage();
-    
-	}
-}
-
-//Actualitza el nickname del conta amb la que has iniciat 
-function actualitzarNickname($id, $nickname) {
-    try {
-
-        $connexio = new PDO('mysql:host=' . SERVER . ';dbname=' . DATABASE, USER_DB, PASS_DB);
-        
-		$stmt = $connexio->prepare('UPDATE usuaris SET nickname = ? WHERE id = ?');
-        
-		$stmt->execute([$nickname, $id]);
-
-        if ($stmt->rowCount() > 0) {
-			echo 'BIEN';
-		}else{
-			echo 'ERROR';
-		}
-
-    } catch (PDOException $e) {
-        
-		echo "Error: ". $e->getMessage();
-    
-	}
-}
 ?>

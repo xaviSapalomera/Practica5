@@ -43,7 +43,7 @@ session_start();
         <?php
 
        
-        include './controller/controlador_index_session.php';
+        include './controller/controlador_index.php';
         
         include './controller/controlador_login.php';
 

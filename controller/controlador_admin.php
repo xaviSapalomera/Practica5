@@ -1,7 +1,9 @@
 <?php
 include './model/model_usuaris.php';
 
-$usuaris = mostrarUsuaris();
+$usuariModel = new Usuari();
+
+$usuaris = $usuariModel->mostrarUsuaris();
 
 echo '<table border="1px white">';
 

@@ -1,24 +1,19 @@
 <?php
 
+
 session_start();
 
+error_reporting(E_ALL); // Informar de todos los errores
+ini_set('display_errors', 1); // Mostrar los errores en pantalla
+
 include './model/model_articles.php';
+
+
+
 include './model/model_usuaris.php';
 
-// Borra la sessió directament
-if (isset($_POST['Logout'])) {
-    session_destroy(); 
 
-    header('Location: index.php');
-
-    if (ini_get("session.use_cookies")) {
-        $params = session_get_cookie_params();
-        setcookie(session_name(), '', time() - 42000, 
-                  $params["path"], $params["domain"], 
-                  $params["secure"], $params["httponly"]);
-    }
-    exit();
-}
+$articleModel = new Article();
 
 // Inicialització de variables
 $order = isset($_POST['order']) && in_array($_POST['order'], ['ascID', 'descID', 'ascNom', 'descNom', 'normal']) 
@@ -28,30 +23,49 @@ $order = isset($_POST['order']) && in_array($_POST['order'], ['ascID', 'descID',
 // Ordenar articles segons el valor seleccionat
 switch ($order) {
     case 'ascID':
-        $articles = mostrarArticlesOrdenatsIDasc() ?: [];
+        $articles = $articleModel->mostrarArticlesOrdenats('id','ASC') ?: [];
         break;
     case 'descID':
-        $articles = mostrarArticlesOrdenatsIDdesc() ?: [];
+        $articles = $articleModel->mostrarArticlesOrdenats('id','DESC') ?: [];
         break;
     case 'ascNom':
-        $articles = mostrarArticlesOrdenatsTitolAsc() ?: [];
+        $articles = $articleModel->mostrarArticlesOrdenats('titol','ASC') ?: [];
         break;
     case 'descNom':
-        $articles = mostrarArticlesOrdenatsTitolDesc() ?: [];
+        $articles = $articleModel->mostrarArticlesOrdenats('titol','DESC') ?: [];
         break;
     default:
-        $articles = mostrarTotsArticles() ?: [];
+        $articles = $articleModel->mostrarTotsArticles() ?: [];
+}
+
+function esTeuElArticle($user_id_article) {
+    if (!isset($_SESSION['nickname'])) {
+        error_log('Error: La sesión no está definida');
+        return false;
+    }
+
+    if ($user_id_article) {
+        $user_nickname = mostrarUsuariArticle($user_id_article);
+        return $_SESSION['nickname'] === $user_nickname;
+    }
+
+    return false;
 }
 
 // Funció per obtenir el nom de l'usuari
 function mostrarUsuariArticle($user_id) {
-    $usuari = filtrarUsuarisPerID($user_id); 
+
+    $usuariModel  = new Usuari();
+    
+    $usuari = $usuariModel->filtrarUsuarisPerID($user_id); 
     if ($usuari) {
-        return htmlspecialchars($usuari['nickname']);
+        return $usuari['nickname'];
     } else {
         return 'No lo ha creat cap usuari registrat'; 
     }
 }
+
+
 
 // Funció per ajustar el format de la data
 function ajustarData($data) {
@@ -63,6 +77,8 @@ function ajustarData($data) {
         return 'Data no disponible';
     }
 }
+
+
 
 // Paginació
 $paginaActual = isset($_GET['page']) && filter_var($_GET['page'], FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) 
@@ -81,8 +97,9 @@ $articles = array_slice($articles, $offset, $articulosPorPagina);
 <div class="contenidor">
     <h1>Articles</h1>
 
+
     <!-- Formulari per ordenar articles -->
-    <form method="POST" action="index.php">
+    <form method="POST" action="index_session.php">
         <label for="order">Filtre:</label>
         <select name="order">
             <option value="normal" <?= $order === 'normal' ? 'selected' : '' ?>>Normal</option>
@@ -108,16 +125,35 @@ $articles = array_slice($articles, $offset, $articulosPorPagina);
                     <div class="article-content">
                         <p><?= isset($article['cos']) ? htmlspecialchars($article['cos']) : 'Sense Cos' ?></p>
                     </div>
-                    <div class="article-actions">
-                        <form method="POST" action="editar_article.php" style="display: inline;">
-                            <input type="hidden" name="id" value="<?= $article['id'] ?>">
-                            <button class="boto_editar" type="submit" aria-label="Editar article"></button>
-                        </form>
-                        <form method="POST" action="eliminar_article.php" style="display: inline;">
-                            <input type="hidden" name="id" value="<?= $article['id'] ?>">
-                            <button type="submit" class="boto_borrar" aria-label="Eliminar article"></button>
-                        </form>
-                    </div>
+                
+                    <?php
+
+                $mostrarUsuariArticle = mostrarUsuariArticle($article['user_id']);
+                   
+        if(esTeuElArticle($article['user_id'])){ 
+                    
+                    echo '<div class="article-actions">';
+                        
+                        echo '<form method="POST" action="editar_article.php" style="display: inline;">';
+                    
+                        echo '<input type="hidden" name="id" value="' . $article['id'] . '">';
+                    
+                        echo '<button class="boto_editar" type="submit" aria-label="Editar article"></button>';
+                    
+                        echo '</form>';
+                    
+                        echo '<form method="POST" action="eliminar_article.php" style="display: inline;">';
+                    
+                        echo '<input type="hidden" name="id" value="' . $article['id'] . '">';
+                    
+                    echo '<button type="submit" class="boto_borrar" aria-label="Eliminar article"></button>';
+                    
+                    echo '</form>';
+                    
+                    echo '</div>';
+                   }
+                ?>
+
                 </div>
             <?php } ?>
         </div>

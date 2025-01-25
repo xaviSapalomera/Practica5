@@ -9,30 +9,37 @@ if(isset($_SESSION['mantindre_sessio'] )){
     header('location: index_session.php');
 }
 
-$order = isset($_POST['order']) ? $_POST['order'] : 'normal';
+$articleModel = new Article();
 
-// Ordenar artículos según el valor seleccionado
+// Inicialització de variables
+$order = isset($_POST['order']) && in_array($_POST['order'], ['ascID', 'descID', 'ascNom', 'descNom', 'normal']) 
+         ? $_POST['order'] 
+         : 'normal';
+
+// Ordenar articles segons el valor seleccionat
 switch ($order) {
     case 'ascID':
-        $articles = mostrarArticlesOrdenatsIDasc();
+        $articles = $articleModel->mostrarArticlesOrdenats('id','ASC') ?: [];
         break;
     case 'descID':
-        $articles = mostrarArticlesOrdenatsIDdesc();
+        $articles = $articleModel->mostrarArticlesOrdenats('id','DESC') ?: [];
         break;
     case 'ascNom':
-        $articles = mostrarArticlesOrdenatsTitolAsc();
+        $articles = $articleModel->mostrarArticlesOrdenats('titol','ASC') ?: [];
         break;
     case 'descNom':
-        $articles = mostrarArticlesOrdenatsTitolDesc();
+        $articles = $articleModel->mostrarArticlesOrdenats('titol','DESC') ?: [];
         break;
     default:
-        $articles = mostrarTotsArticles();
+        $articles = $articleModel->mostrarTotsArticles() ?: [];
 }
 
-// Funció per obtindre el nom del usuari
+// Funció per obtenir el nom de l'usuari
 function mostrarUsuariArticle($user_id) {
-    $usuari = filtrarUsuarisPerID($user_id); 
+
+    $usuariModel  = new Usuari();
     
+    $usuari = $usuariModel->filtrarUsuarisPerID($user_id); 
     if ($usuari) {
         return htmlspecialchars($usuari['nickname']);
     } else {
@@ -40,10 +47,10 @@ function mostrarUsuariArticle($user_id) {
     }
 }
 
-// Funció para ajustar el formato de fecha
+// Funció per ajustar el format de la data
 function ajustarData($data) {
     if ($data) {
-        // Convertir del formato Y-m-d a d/m/Y
+        // Convertir del format Y-m-d a d/m/Y
         $fecha_convertida = DateTime::createFromFormat('Y-m-d', $data)->format('d/m/Y');
         return $fecha_convertida;
     } else {
@@ -51,11 +58,13 @@ function ajustarData($data) {
     }
 }
 
-// Paginación
-$paginaActual = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+// Paginació
+$paginaActual = isset($_GET['page']) && filter_var($_GET['page'], FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) 
+                ? (int)$_GET['page'] 
+                : 1;
+
 $totalArticulos = count($articles);
 $articulosPorPagina = 10;
-
 $totalPagines = ($totalArticulos > 0) ? ceil($totalArticulos / $articulosPorPagina) : 0;
 
 $offset = ($paginaActual - 1) * $articulosPorPagina;
@@ -66,41 +75,44 @@ $articles = array_slice($articles, $offset, $articulosPorPagina);
 <div class="contenidor">
     <h1>Articles</h1>
 
-    <!-- Formulario para ordenar artículos -->
-    <form method="POST" action="index.php">
+    <!-- Formulari per ordenar articles -->
+    <form method="POST" action="index_session.php">
         <label for="order">Filtre:</label>
         <select name="order">
-            <option value="normal">Normal</option>
-            <option value="ascID">Asc(ID)</option>
-            <option value="descID">Desc(ID)</option>
-            <option value="ascNom">Asc(Nom)</option>
-            <option value="descNom">Desc(Nom)</option>
+            <option value="normal" <?= $order === 'normal' ? 'selected' : '' ?>>Normal</option>
+            <option value="ascID" <?= $order === 'ascID' ? 'selected' : '' ?>>Asc(ID)</option>
+            <option value="descID" <?= $order === 'descID' ? 'selected' : '' ?>>Desc(ID)</option>
+            <option value="ascNom" <?= $order === 'ascNom' ? 'selected' : '' ?>>Asc(Nom)</option>
+            <option value="descNom" <?= $order === 'descNom' ? 'selected' : '' ?>>Desc(Nom)</option>
         </select>
         <button type="submit">Ordenar</button>
     </form>
-
-    <section class="articles">
-        <?php if (!empty($articles)) { ?>
-            <div class="articles-blocks">
-                <?php foreach ($articles as $article) { ?>
-                    <div class="article-block">
-                        <div class="article-header">
-                            <h3><?= isset($article['titol']) ? htmlspecialchars($article['titol']) : 'Sense Titol' ?></h3>
-                            <small>Usuari: <?= isset($article['user_id']) ? htmlspecialchars(mostrarUsuariArticle($article['user_id'])) : 'Sense Usuari' ?></small><br>
-                            <small>Data: <?= isset($article['data']) ? htmlspecialchars(ajustarData($article['data'])) : 'Sense Data' ?></small>
-                        </div>
-                        <div class="article-content">
-                            <p><?= isset($article['cos']) ? htmlspecialchars($article['cos']) : 'Sense Cos' ?></p>
-                        </div>
+    <link rel="stylesheet" href="../estil/estil_sesion.css">
+    
+<section class="articles">
+    <?php if (!empty($articles)) { ?>
+        <div class="articles-blocks">
+            <?php foreach ($articles as $article) { ?>
+                <div class="article-block">
+                    <div class="article-header">
+                        <h3><?= isset($article['titol']) ? htmlspecialchars($article['titol']) : 'Sense Titol' ?></h3>
+                        <small>Usuari: <?= isset($article['user_id']) ? htmlspecialchars(mostrarUsuariArticle($article['user_id'])) : 'Sense Usuari' ?></small><br>
+                        <small>Data: <?= isset($article['data']) ? htmlspecialchars(ajustarData($article['data'])) : 'Sense Data' ?></small>
                     </div>
-                <?php } ?>
-            </div>
-        <?php } else { ?>
-            <p>No hi ha articles disponibles en aquesta pàgina.</p>
-        <?php } ?>
-    </section>
+                    <div class="article-content">
+                        <p><?= isset($article['cos']) ? htmlspecialchars($article['cos']) : 'Sense Cos' ?></p>
+                    </div>
+                    <div class="article-actions">
+                    </div>
+                </div>
+            <?php } ?>
+        </div>
+    <?php } else { ?>
+        <p>No hi ha articles disponibles en aquesta pàgina.</p>
+    <?php } ?>
+</section>
 
-    <!-- Sección para la paginación -->
+    <!-- Secció per a la paginació -->
     <section class="paginacio">
         <ul>
             <?php if ($paginaActual > 1) { ?>

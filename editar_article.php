@@ -16,15 +16,20 @@
     <hr style="width: 100%; margin: 0;">
 
     <?php
-        include './model/model_articles.php';
+    error_reporting(E_ALL); // Informar de todos los errores
+    ini_set('display_errors', 1); // Mostrar los errores en pantalla
+    
+include './model/model_articles.php';
+
+    $articleModel = new Article();    
 
         if (isset($_POST['id'])) {
-            
+
 
             $id = $_POST['id'];
 
             
-            $resultat = trobarArticlePerID($id);
+            $resultat =  $articleModel->trobarArticlePerID($id);
 
             if ($resultat) {
                 ?>
@@ -33,13 +38,10 @@
                     <input type="hidden" name="id" value="<?= htmlspecialchars($id) ?>">
 
                     
-                    <label for="titol">Títol:</label>
                     <input class="input" type="text" id="titol" name="titol" value="<?= htmlspecialchars($resultat['titol']) ?>" placeholder="Títol" required>
                     <br><br>
 
                     
-                    <label for="cos">Cos:</label>
-
                     <br>
                     <textarea class="input" id="cos" name="cos" placeholder="Cos" style="height: 250px; width: 400px; text-align: left; padding: 10px;" required><?= htmlspecialchars($resultat['cos']) ?></textarea>
                     <br><br>
